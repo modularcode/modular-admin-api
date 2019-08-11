@@ -1,22 +1,21 @@
 import express from 'express'
-import { ApolloServer } from 'apollo-server-express'
-import depthLimit from 'graphql-depth-limit'
+
 import { createServer } from 'http'
 import compression from 'compression'
 import cors from 'cors'
 
-import schema from './graphql/schema'
+import api from './api'
+import apiGraphQL from './apiGraphQL'
 
 const app = express()
-const server = new ApolloServer({
-  schema,
-  validationRules: [depthLimit(7)],
-})
 
 app.use('*', cors())
 app.use(compression())
-server.applyMiddleware({ app, path: '/graphql' })
-const httpServer = createServer(app)
-httpServer.listen({ port: 4000 }, (): void =>
-  console.log(`\n🚀      GraphQL is now running on http://localhost:4000/graphql`),
-)
+
+api.init('/api', app)
+apiGraphQL.init('/graphql', app)
+
+createServer(app).listen({ port: 4000 }, (): void => {
+  console.log(`\n🚀 REST API is now running on http://localhost:4000/api`)
+  console.log(`\n🚀 GraphQL is now running on http://localhost:4000/graphql`)
+})
